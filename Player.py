@@ -1,8 +1,19 @@
 import pygame as pg
 import sys
-
 class Player:
-
+"""
+Initialize before the while loop
+player = Player(x=400, y=700, scale=2)
+dt = 0
+player_sheet = pg.image.load("SpaceShooterAssets/SpaceShooterAssetPack_Ships.png").convert_alpha()
+In the while loop:
+    keys = pg.key.get_pressed()
+    player.get_sprite(player_sheet,180,32,64,16,16)
+    player.update()
+    player.show(screen)
+    player.move(dt, keys)
+    dt = clock.tick(60)/1000
+"""
     def __init__(self, x = 0, y = 0, scale = 1):
         self.x_pos = x
         self.y_pos = y
