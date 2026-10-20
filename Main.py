@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 20 17:13:59 2026
-
-@author: andre
-"""
+import pygame as pg
+import math as m
+import random as rand
+import os
+import sys
 
