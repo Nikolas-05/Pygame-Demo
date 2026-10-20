@@ -88,41 +88,42 @@ def read_controls():
             'down': keys[pg.K_DOWN]}  #, 'jump': keys[pg.K_SPACE], 'throw': keys[pg.K_f]}
 
 
+PLAYER_WIDTH = 40              # the spaceship image is big, so it is scaled down to this width
+
+
 class Spaceship(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.gravity = 0
-        self.on_ground = True
-        self.space_was_down = False
-        self.controls = {'left': False, 'right': False, 'up': False, 'down': False, 'jump': False, 'throw': False}
+        self.controls = {'left': False, 'right': False, 'up': False, 'down': False}
         self.speed = 4
-        self.image = pg.image.load('Demo_images/spaceship.png').convert_alpha()
-        self.rect = self.image.get_rect(midbottom =(200,400))
-
-
+        image = pg.image.load('Demo_images/spaceship.PNG').convert_alpha()
+        height = round(image.get_height() * PLAYER_WIDTH / image.get_width())
+        self.image = pg.transform.smoothscale(image, (PLAYER_WIDTH, height))
+        self.rect = self.image.get_rect(midbottom=(200, 400))
 
     def spaceship_imput(self, obstacles):
         self.controls = keys = read_controls()
 
         self.moving = False
-        self.walking_up = False
         if keys['left']:
-            self.rect.x -= self.walk_step()
+            self.rect.x -= self.speed
             self.moving = True
-            self.facing_left = True
         if keys['right']:
-            self.rect.x += self.walk_step()
+            self.rect.x += self.speed
             self.moving = True
-            self.facing_left = False
-            
+        if keys['up']:
+            self.rect.y -= self.speed
+            self.moving = True
+        if keys['down']:
+            self.rect.y += self.speed
+            self.moving = True
+
         for obs in obstacles:
             if self.rect.colliderect(obs.rect):
                 if self.rect.centerx < obs.rect.centerx: self.rect.right = obs.rect.left
                 else: self.rect.left = obs.rect.right
-                
-    def update(self, screen_height=400):
-        self.move()
 
-
-        
-        
+    def update(self, screen_size=(800, 400), obstacles=()):
+        self.spaceship_imput(obstacles)
+        # keep the ship on the screen
+        self.rect.clamp_ip(pg.Rect((0, 0), screen_size))
