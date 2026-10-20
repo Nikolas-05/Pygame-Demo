@@ -90,13 +90,13 @@ def read_controls():
 
 class Spaceship(pg.sprite.Sprite):
     def __init__(self):
-        super().__init()
+        super().__init__()
         self.gravity = 0
         self.on_ground = True
         self.space_was_down = False
         self.controls = {'left': False, 'right': False, 'up': False, 'down': False, 'jump': False, 'throw': False}
         self.speed = 4
-        self.image = pg.image.load('Demo_images/spacship.png').convert_alpha()
+        self.image = pg.image.load('Demo_images/spaceship.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom =(200,400))
 
 
@@ -120,10 +120,8 @@ class Spaceship(pg.sprite.Sprite):
                 if self.rect.centerx < obs.rect.centerx: self.rect.right = obs.rect.left
                 else: self.rect.left = obs.rect.right
                 
-    def update(self, obstacles=(), platforms=()):
-        self.cat_imput(obstacles)
-        # self.anime_state()
-
+    def update(self, screen_height=400):
+        self.move()
 
 
         
