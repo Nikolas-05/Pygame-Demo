@@ -47,6 +47,12 @@ while True:
     
     
     #Game update section
+    if not enemies:
+        for i in range(5):
+            x_pos = 800/5*i
+            enemies.append(Enemy.Enemy(x_pos, y=0, scale = 2))
+    
+    
     for laser in lasers:
         laser.move(dt, speed_scale=50)
         laser.destroy()
@@ -60,6 +66,7 @@ while True:
         enemy.show(screen)
         for laser in lasers:
             enemy.destroy(laser)
+            laser.destroy(enemy)
     enemies = [enemy for enemy in enemies if not enemy.destroyed]
 
     player.update()

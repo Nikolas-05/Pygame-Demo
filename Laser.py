@@ -3,7 +3,9 @@ import math as m
 import random as rand
 import os
 import sys
-from Player import *
+import Player
+import Enemy
+
 class Laser:
     """
     add in code
@@ -42,16 +44,19 @@ class Laser:
         Pass the dt time clock into this
 
         """
-        if isinstance(self.owner, Player):
+        if isinstance(self.owner, Player.Player):
             self.y_pos -= self.speed*dt*speed_scale
         else:
             self.y_pos += self.speed*dt*speed_scale
             
-    def destroy(self):
+    def destroy(self, enemy = None):
         """
         Marks a flag to have destroy = True, need to run .remove somewhere in main, add enemy collision also
 
         """
-        if isinstance(self.owner, Player):
+        if isinstance(self.owner, Player.Player):
             if self.proj.bottom < 0:
                 self.destroyed = True
+        if enemy != None and isinstance(enemy, Enemy.Enemy):
+            if self.proj.colliderect(enemy.enemy_rect):
+                    self.destroyed = True
