@@ -6,7 +6,7 @@ import sys
 
 from lives_class import Lives
 from Player import Spaceship
-from Enemy_class import Enemy
+from Enemy_class import Enemy, Meteor
 
 
 pg.init()
@@ -21,7 +21,10 @@ player.sprite.rect.midbottom = (400, 400)   # the ship starts at the bottom midd
 
 enemies = pg.sprite.Group()
 ENEMY_SPAWN = pg.USEREVENT + 1
-pg.time.set_timer(ENEMY_SPAWN, 2000)      
+pg.time.set_timer(ENEMY_SPAWN, 2000)
+
+METEOR_SPAWN = pg.USEREVENT + 2
+pg.time.set_timer(METEOR_SPAWN, 3000)      # a new meteor every 3 seconds
 
 while True:
     for event in pg.event.get():
@@ -34,6 +37,8 @@ while True:
                 pg.display.toggle_fullscreen()
         if event.type == ENEMY_SPAWN:
             enemies.add(Enemy(screen.get_width()))
+        if event.type == METEOR_SPAWN:
+            enemies.add(Meteor(screen.get_width()))
 
     screen.fill('black')
     player.update(screen.get_size())
