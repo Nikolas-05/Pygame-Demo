@@ -56,5 +56,5 @@ class Enemy(pg.sprite.Sprite):
 
     def update(self, screen_height=400):
         self.move()
-        if self.rect.top > screen_height:      # gone past the bottom of the screen
+        if self.rect.top > screen_height:
             self.kill()

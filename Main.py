@@ -21,7 +21,7 @@ player.sprite.rect.midbottom = (400, 400)   # the ship starts at the bottom midd
 
 enemies = pg.sprite.Group()
 ENEMY_SPAWN = pg.USEREVENT + 1
-pg.time.set_timer(ENEMY_SPAWN, 1200)       # a new enemy every 1.2 seconds
+pg.time.set_timer(ENEMY_SPAWN, 2000)      
 
 while True:
     for event in pg.event.get():
@@ -35,19 +35,17 @@ while True:
         if event.type == ENEMY_SPAWN:
             enemies.add(Enemy(screen.get_width()))
 
-    # if cat.hard_landing or bitten or hit_by_car:
-    #     shake_timer = SHAKE_FRAMES
-    #     lives.lose_life(1)
-    #     if lives.out_of_lives():
-    #         haptics.set(0)
-    #         py.quit()
-    #         sys.exit()
-    # lives.update()
     screen.fill('black')
     player.update(screen.get_size())
     player.draw(screen)
-    
     enemies.update(screen.get_height())
+    
+    if pg.sprite.spritecollide(player.sprite, enemies, True):
+        lives.lose_life(1)
+        if lives.out_of_lives():
+            pg.quit()
+            sys.exit()
+
     enemies.draw(screen)
     lives.draw(screen)
     pg.display.update()
