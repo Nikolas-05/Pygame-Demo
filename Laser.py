@@ -42,7 +42,7 @@ class Laser:
         Pass the dt time clock into this
 
         """
-        if self.owner=="player":
+        if isinstance(self.owner, Player):
             self.y_pos -= self.speed*dt*speed_scale
         else:
             self.y_pos += self.speed*dt*speed_scale

@@ -5,7 +5,7 @@ import os
 import sys
 import Player
 import Laser
-
+import Enemy
 #Initialize everything
 pg.init()
 
@@ -14,9 +14,13 @@ clock = pg.time.Clock()
 player = Player.Player(x=400, y=700, scale=2)
 dt = 0
 lasers = []
+enemies = []
 last_laser_timer = 0
 time_between_shot =  0.5
 
+for i in range(5):
+    x_pos = 800/5*i
+    enemies.append(Enemy.Enemy(x_pos, y=0, scale = 2))
 
 while True:
     
@@ -35,7 +39,7 @@ while True:
     screen.fill("black")
     
     if keys[pg.K_SPACE] and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
-        laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner="player")
+        laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner= player)
         lasers.append(laser)
         last_laser_timer= pg.time.get_ticks()
     
@@ -49,10 +53,20 @@ while True:
         laser.update()
         laser.show(screen)
     lasers = [laser for laser in lasers if not laser.destroyed]
+    
+    for enemy in enemies:
+        enemy.move(dt, v_x=0, v_y = 50)
+        enemy.update()
+        enemy.show(screen)
+        for laser in lasers:
+            enemy.destroy(laser)
+    enemies = [enemy for enemy in enemies if not enemy.destroyed]
 
     player.update()
     player.show(screen)
     
     pg.display.update()
     dt = clock.tick(60)/1000
+    
+    
     
