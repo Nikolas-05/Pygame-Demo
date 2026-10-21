@@ -5,21 +5,21 @@ import os
 import sys
 
 class Player:
-"""
-need to add to main 
----
-player = Player(x=400, y=700, scale=2)
-dt = 0
----
-in while loop
-    keys = pg.key.get_pressed()
-    
-    player.move(dt, keys)
-    player.update()
-    player.show(screen)
-    
-    pg.display.update() 
-"""
+    """
+    need to add to main 
+    ---
+    player = Player(x=400, y=700, scale=2)
+    dt = 0
+    ---
+    in while loop
+        keys = pg.key.get_pressed()
+        
+        player.move(dt, keys)
+        player.update()
+        player.show(screen)
+        
+        pg.display.update() 
+    """
     def __init__(self, x = 0, y = 0, scale = 1):
         self.x_pos = x
         self.y_pos = y
