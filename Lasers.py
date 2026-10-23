@@ -44,6 +44,9 @@ class Laser:
         if isinstance(self.owner, Player.Spaceship):
             if self.proj.bottom < 0:
                 self.destroyed = True
+                
+        elif self.proj.top > pg.display.get_surface().get_height():   # added: enemy lasers are used up once they leave the bottom of the screen
+            self.destroyed = True                                     # added
         if enemy != None and isinstance(enemy, Enemy.Enemy):
             if self.proj.colliderect(enemy.rect):
                     self.destroyed = True

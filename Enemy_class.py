@@ -8,11 +8,14 @@ Created on Tue Oct 20 18:18:06 2026
 import pygame as pg
 import math as m
 import random as r
+import Lasers                  # added: so enemies can fire Laser objects
 
 ENEMY_WIDTH = 30
 
 
 class Enemy(pg.sprite.Sprite):
+    lasers = []                # added: one list shared by every enemy, so shots keep flying after the enemy dies
+
     def __init__(self, screen_width=800):
         super().__init__()
         image = pg.image.load('Demo_images/spaceship.PNG').convert_alpha()
@@ -34,6 +37,7 @@ class Enemy(pg.sprite.Sprite):
         self.weave_speed = r.uniform(0.02, 0.06)
         self.weave_timer = r.uniform(0, m.tau)
         self.turn_timer = r.randint(60, 180)
+        self.shot_timer = r.randint(20, 120)       # added: frames until this enemy's first shot
 
     def move(self):
         self.y += self.speed
@@ -56,6 +60,10 @@ class Enemy(pg.sprite.Sprite):
 
     def update(self, screen_height=400):
         self.move()
+        self.shot_timer -= 1                                       # added: count down to the next shot
+        if self.shot_timer <= 0:                                   # added: time to shoot
+            Enemy.lasers.append(Lasers.Laser(self.rect.centerx, self.rect.bottom + 30, owner=self, color='red', speed=8))  # added: red laser starting just under the ship, moving down
+            self.shot_timer = r.randint(60, 150)                   # added: wait 1 to 2.5 seconds before shooting again
         if self.rect.top > screen_height:
             self.kill()
             

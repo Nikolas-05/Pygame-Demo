@@ -5,7 +5,7 @@ import os
 import sys
 
 from lives_class import Lives
-from Player import Spaceship
+from Player import Spaceship, read_controls      # adjusted: read_controls lets the intro use the same 'throw' button
 from Enemy_class import Enemy, Meteor
 
 
@@ -13,6 +13,21 @@ pg.init()
 
 screen = pg.display.set_mode((800,400), pg.SCALED | pg.RESIZABLE)
 clock = pg.time.Clock()
+
+# ---- intro screen ----
+intro_bg = pg.transform.smoothscale(pg.image.load('Demo_images/Galaxy_background_black.PNG').convert(), screen.get_size()) 
+title = pg.font.Font(None, 72).render('Galaga for Engineers', True, 'white')      
+prompt = pg.font.Font(None, 32).render('Press SPACE or X to start', True, 'white') 
+while not read_controls()['shoot']:                                           
+    for event in pg.event.get():                                              
+        if event.type == pg.QUIT:                                          
+            pg.quit()                                                        
+            sys.exit()                                                          
+    screen.blit(intro_bg, (0, 0))                                            
+    screen.blit(title, title.get_rect(center=(400, 150)))               
+    screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+    pg.display.update()                                                          
+    clock.tick(60)
 
 lives = Lives()
 
@@ -39,10 +54,13 @@ while True:
             full = pg.display.is_fullscreen()
             if event.key == pg.K_F11 or (event.key == pg.K_ESCAPE and full):
                 pg.display.toggle_fullscreen()
+                
         if event.type == ENEMY_SPAWN:
             enemies.add(Enemy(screen.get_width()))
+            
         if event.type == METEOR_SPAWN:
             enemies.add(Meteor(screen.get_width()))
+            
     keys = pg.key.get_pressed()
     screen.fill('black')
     
@@ -67,6 +85,19 @@ while True:
                 laser.destroyed = True
         laser.show(screen)
     player.sprite.lasers = [laser for laser in player.sprite.lasers if not laser.destroyed]
+
+    for laser in Enemy.lasers:                                # added: move and draw every enemy laser
+        laser.move(dt, speed_scale=50)                        # added: enemy lasers move down
+        laser.destroy()                                       # added: used up once off the bottom of the screen
+        laser.update()                                        # added
+        if laser.proj.colliderect(player.sprite.rect):        # added: an enemy laser hit the player
+            laser.destroyed = True                            # added: the laser is used up
+            lives.lose_life(1)                                # added: the player loses one life
+            if lives.out_of_lives():                          # added: all lives gone, so the game ends
+                pg.quit()                                     # added
+                sys.exit()                                    # added
+        laser.show(screen)                                    # added
+    Enemy.lasers[:] = [laser for laser in Enemy.lasers if not laser.destroyed]   # added: drop used up enemy lasers
 
 
     enemies.draw(screen)
