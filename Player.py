@@ -6,6 +6,7 @@ Created on Tue Oct 20 17:07:49 2026
 """
 
 import pygame as pg
+import Lasers
 
 try:
     from pygame._sdl2 import controller as sdl_controller
@@ -73,19 +74,21 @@ def read_controls():
         return {'left': x < -DEADZONE or b(pg.CONTROLLER_BUTTON_DPAD_LEFT),
                 'right': x > DEADZONE or b(pg.CONTROLLER_BUTTON_DPAD_RIGHT),
                 'up': y < -DEADZONE or b(pg.CONTROLLER_BUTTON_DPAD_UP),
-                'down': y > DEADZONE or b(pg.CONTROLLER_BUTTON_DPAD_DOWN)}
+                'down': y > DEADZONE or b(pg.CONTROLLER_BUTTON_DPAD_DOWN),
+                'throw': b(pg.CONTROLLER_BUTTON_X)}
                 # 'jump': b(pg.CONTROLLER_BUTTON_A), 'throw': b(pg.CONTROLLER_BUTTON_X)}
     if pad:
         x = pad.get_axis(0) if pad.get_numaxes() > 0 else 0
         y = pad.get_axis(1) if pad.get_numaxes() > 1 else 0
         hx, hy = pad.get_hat(0) if pad.get_numhats() > 0 else (0, 0)     # D-pad: hat y is +1 for up
-        # button = lambda b: bool(pad.get_button(b)) if pad.get_numbuttons() > b else False
+        button = lambda b: bool(pad.get_button(b)) if pad.get_numbuttons() > b else False
         return {'left': x < -DEADZONE or hx < 0, 'right': x > DEADZONE or hx > 0,
-                'up': y < -DEADZONE or hy > 0, 'down': y > DEADZONE or hy < 0}
+                'up': y < -DEADZONE or hy > 0, 'down': y > DEADZONE or hy < 0,
+                'throw': button(THROW_BUTTON)}
                 # 'jump': button(JUMP_BUTTON), 'throw': button(THROW_BUTTON)}
     keys = pg.key.get_pressed()
     return {'left': keys[pg.K_LEFT], 'right': keys[pg.K_RIGHT], 'up': keys[pg.K_UP],
-            'down': keys[pg.K_DOWN]}  #, 'jump': keys[pg.K_SPACE], 'throw': keys[pg.K_f]}
+            'down': keys[pg.K_DOWN], 'throw': keys[pg.K_SPACE]}  #, 'jump': keys[pg.K_SPACE], 'throw': keys[pg.K_f]}
 
 
 PLAYER_WIDTH = 40              # the spaceship image is big, so it is scaled down to this width
@@ -94,12 +97,15 @@ PLAYER_WIDTH = 40              # the spaceship image is big, so it is scaled dow
 class Spaceship(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.controls = {'left': False, 'right': False, 'up': False, 'down': False}
+        self.controls = {'left': False, 'right': False, 'up': False, 'down': False, 'throw': False}
         self.speed = 4
         image = pg.image.load('Demo_images/spaceship.PNG').convert_alpha()
         height = round(image.get_height() * PLAYER_WIDTH / image.get_width())
         self.image = pg.transform.smoothscale(image, (PLAYER_WIDTH, height))
         self.rect = self.image.get_rect(midbottom=(200, 400))
+        self.lasers = []
+        self.last_laser_timer = 0
+        self.time_bt_shot = 0.2                # seconds between shots
 
     def spaceship_imput(self, obstacles):
         self.controls = keys = read_controls()
@@ -117,6 +123,9 @@ class Spaceship(pg.sprite.Sprite):
         if keys['down']:
             self.rect.y += self.speed
             self.moving = True
+        if keys['throw'] and (pg.time.get_ticks()-self.last_laser_timer)/1000 > self.time_bt_shot:
+            self.lasers.append(Lasers.Laser(self.rect.centerx, self.rect.top, owner=self))
+            self.last_laser_timer = pg.time.get_ticks()
 
         for obs in obstacles:
             if self.rect.colliderect(obs.rect):

@@ -15,6 +15,7 @@ screen = pg.display.set_mode((800,400), pg.SCALED | pg.RESIZABLE)
 clock = pg.time.Clock()
 
 lives = Lives()
+
 player = pg.sprite.GroupSingle()
 player.add(Spaceship())
 player.sprite.rect.midbottom = (400, 400)   # the ship starts at the bottom middle
@@ -25,6 +26,9 @@ pg.time.set_timer(ENEMY_SPAWN, 2000)
 
 METEOR_SPAWN = pg.USEREVENT + 2
 pg.time.set_timer(METEOR_SPAWN, 3000)      # a new meteor every 3 seconds
+
+dt = 0
+
 
 while True:
     for event in pg.event.get():
@@ -39,8 +43,9 @@ while True:
             enemies.add(Enemy(screen.get_width()))
         if event.type == METEOR_SPAWN:
             enemies.add(Meteor(screen.get_width()))
-
+    keys = pg.key.get_pressed()
     screen.fill('black')
+    
     player.update(screen.get_size())
     player.draw(screen)
     enemies.update(screen.get_height())
@@ -50,8 +55,21 @@ while True:
         if lives.out_of_lives():
             pg.quit()
             sys.exit()
+    for laser in player.sprite.lasers:
+        laser.move(dt, speed_scale=50)
+        
+        laser.destroy()
+        laser.update()
+        # a laser that hits an enemy kills it and is used up
+        for enemy in enemies:
+            if laser.proj.colliderect(enemy.rect):
+                enemy.kill()
+                laser.destroyed = True
+        laser.show(screen)
+    player.sprite.lasers = [laser for laser in player.sprite.lasers if not laser.destroyed]
+
 
     enemies.draw(screen)
     lives.draw(screen)
     pg.display.update()
-    clock.tick(60)
+    dt = clock.tick(60) / 1000                # seconds since the last frame, for the lasers
