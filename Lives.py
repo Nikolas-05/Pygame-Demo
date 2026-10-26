@@ -15,7 +15,7 @@ class Lives:
         self.max_lives = max_lives
         self.lives = start_lives
         self.regen_timer = 0
-        self.heart = pg.image.load('Demo_images/heart.png').convert_alpha()
+        self.heart = pg.image.load('heart.png').convert_alpha()
 
     def lose_life(self, count=1):
         self.lives = max(0, self.lives - count)
