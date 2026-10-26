@@ -7,10 +7,16 @@ import Player
 import Laser
 import Enemy
 import Score
+import Background
 #Initialize everything
 pg.init()
 
-screen = pg.display.set_mode((800,800), pg.SCALED | pg.RESIZABLE)
+
+window_width = 800
+window_height = 800
+screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
+background= Background.Background(window_width, window_height)
+
 clock = pg.time.Clock()
 player = Player.Player(x=400, y=700, scale=2)
 dt = 0
@@ -41,7 +47,7 @@ while True:
     
     #Player control section
     keys = pg.key.get_pressed()
-    screen.fill("black")
+    background.show(screen)
     
     if keys[pg.K_SPACE] and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
         laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner= player)
