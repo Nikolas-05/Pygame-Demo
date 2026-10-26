@@ -9,6 +9,7 @@ import Enemy
 import Score
 import Background
 import ShootingEnemy
+import Lives                                   # added: the hearts / lives counter
 #Initialize everything
 pg.init()
 
@@ -19,7 +20,7 @@ screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZA
 background= Background.Background(window_width, window_height)
 
 clock = pg.time.Clock()
-player = Player.Player(x=400, y=700, scale=2)
+player = Player.Player(x=400, y=350, scale=2)   # adjusted: y was 700, below the 400 tall window, so the player was off screen
 dt = 0
 lasers = []
 enemies = []
@@ -27,6 +28,7 @@ last_laser_timer = 0
 time_between_shot =  .5
 score_obj = Score.Score(650,10, None, 40)
 score = 0
+lives = Lives.Lives()                          # added: start with 3 lives
 keys = pg.key.get_pressed()
 
 #Wave handling
@@ -34,20 +36,20 @@ waves = open("waves.txt", "r")
 
 
 # # ---- intro screen ----
-while True:
-    intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size()) 
-    title = pg.font.Font(None, 72).render('Galaga for Engineers', True, 'white')      
-    prompt = pg.font.Font(None, 32).render('Press SPACE or X to start', True, 'white') 
-    while not keys[pg.K_SPACE]:                                           
-        for event in pg.event.get():                                              
-            if event.type == pg.QUIT:                                          
-                pg.quit()                                                        
-                sys.exit()                                                          
-        screen.blit(intro_bg, (0, 0))                                            
-        screen.blit(title, title.get_rect(center=(400, 150)))               
-        screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
-        pg.display.update()                                                          
-        clock.tick(60)
+intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size())   # adjusted: no outer while True, it trapped the game in the intro forever
+title = pg.font.Font(None, 72).render('Galaga for Engineers', True, 'white')       # adjusted: moved out of the removed while True
+prompt = pg.font.Font(None, 32).render('Press SPACE to start', True, 'white')      # adjusted: moved out of the removed while True
+while not keys[pg.K_SPACE]:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            pg.quit()
+            sys.exit()
+    screen.blit(intro_bg, (0, 0))
+    screen.blit(title, title.get_rect(center=(400, 150)))
+    screen.blit(prompt, prompt.get_rect(center=(400, 260)))
+    pg.display.update()
+    clock.tick(60)
+    keys = pg.key.get_pressed()                # added: re-read the keyboard every frame, so pressing SPACE ends the intro
 
 def progressWave(waves):
     line = waves.readline().rstrip("\r\n")
@@ -114,6 +116,13 @@ while True:
         for laser in lasers:
             score+=enemy.destroy(laser)
             laser.destroy(enemy)
+
+        if enemy.enemy_rect.colliderect(player.player_rect):   # added: the enemy touched the player
+            enemy.destroy()                                     # added: remove that enemy so it only costs one life
+            lives.lose_life(1)                                  # added: the player loses one life
+            if lives.out_of_lives():                            # added: no lives left
+                pg.quit()                                       # added: end the game
+                sys.exit()                                      # added
     enemies = [enemy for enemy in enemies if not enemy.destroyed]
     
     
@@ -121,6 +130,7 @@ while True:
     score_obj.update(text, screen)
     player.update()
     player.show(screen)
+    lives.draw(screen)                         # added: draw the hearts in the top left
     
     pg.display.update()
     dt = clock.tick(60)/1000
