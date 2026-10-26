@@ -97,13 +97,14 @@ PLAYER_WIDTH = 40              # the spaceship image is big, so it is scaled dow
 class Spaceship(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.controls = {'left': False, 'right': False, 'up': False, 'down': False, 'throw': False}
+        self.controls = {'left': False, 'right': False, 'up': False, 'down': False, 'shoot': False}
         self.speed = 4
         image = pg.image.load('Demo_images/spaceship.PNG').convert_alpha()
         height = round(image.get_height() * PLAYER_WIDTH / image.get_width())
         self.image = pg.transform.smoothscale(image, (PLAYER_WIDTH, height))
         self.rect = self.image.get_rect(midbottom=(200, 400))
         self.lasers = []
+        self.scroll = 0                        # added: sideways scroll, read by Main.py
         self.last_laser_timer = 0
         self.time_bt_shot = 0.2                # seconds between shots
 
@@ -111,11 +112,12 @@ class Spaceship(pg.sprite.Sprite):
         self.controls = keys = read_controls()
 
         self.moving = False
+        self.scroll = 0                        # added: how far the world slides sideways this frame
         if keys['left']:
-            self.rect.x -= self.speed
+            self.scroll = -self.speed          # adjusted: the ship stays put and the world scrolls instead
             self.moving = True
         if keys['right']:
-            self.rect.x += self.speed
+            self.scroll = self.speed           # adjusted: the ship stays put and the world scrolls instead
             self.moving = True
         if keys['up']:
             self.rect.y -= self.speed

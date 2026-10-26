@@ -49,10 +49,7 @@ class Enemy(pg.sprite.Sprite):
             self.drift = r.uniform(-1.5, 1.5)
             self.turn_timer = r.randint(60, 180)
 
-        # bounce off the sides of the screen
-        if self.x < ENEMY_WIDTH or self.x > self.screen_width - ENEMY_WIDTH:
-            self.drift = -self.drift
-            self.x = max(ENEMY_WIDTH, min(self.x, self.screen_width - ENEMY_WIDTH))
+        self.x %= self.screen_width            # adjusted: the world loops, so going off one side comes back on the other
 
         self.rect.centerx = round(self.x + m.sin(self.weave_timer) * self.weave_size)
         self.rect.bottom = round(self.y + self.rect.height)

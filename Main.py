@@ -47,7 +47,32 @@ pg.time.set_timer(SPAWN_RAMP, 5000)        # added
 spawns_per_5s = 2.5                        # added: the starting rate, one enemy every 2 seconds = 2.5 per 5 seconds
 
 dt = 0
+stars = [[rand.randint(0, 800), rand.randint(0, 400), rand.choice([1, 1, 2])] for _ in range(80)]   # added: 120 stars as [x, y, size], most small, some bigger
 speed_boost = 0                            # added: extra speed every enemy ship gets, grows over time
+
+
+def game_over():                           # added: the outro, used by both ways of losing the last life
+    outro_bg = pg.transform.smoothscale(pg.image.load('Demo_images/Galaxy_background_black.PNG').convert(), screen.get_size()) 
+    title = pg.font.Font(None, 72).render('Good Game Engineer', True, 'white')      
+    prompt = pg.font.Font(None, 32).render('See you Again', True, 'white') 
+    while read_controls()['shoot']:            # added: wait for the shoot button to be let go first
+
+        pg.event.pump()                          # added
+
+
+
+    while not read_controls()['shoot']:                                           
+        for event in pg.event.get():                                              
+            if event.type == pg.QUIT:                                          
+                pg.quit()                                                        
+                sys.exit()                                                          
+        screen.blit(outro_bg, (0, 0))  # adjusted: was intro_bg                                            
+        screen.blit(title, title.get_rect(center=(400, 150)))               
+        screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+        pg.display.update()                                                          
+        clock.tick(60)
+    pg.quit()                              # added
+    sys.exit()                             # added
 
 
 while True:
@@ -74,6 +99,18 @@ while True:
     screen.fill('black')
     
     player.update(screen.get_size())
+    scroll = player.sprite.scroll                                   # added: the ship flying left or right slides the world the other way
+    width = screen.get_width()                                      # added
+    for enemy in enemies:                                           # added: slide every enemy and meteor
+        enemy.x = (enemy.x - scroll) % width                        # added: wrap so the world never ends
+        if isinstance(enemy, Meteor):                               # added: meteors don't set their own x each frame
+            enemy.rect.centerx = round(enemy.x)                     # added
+    for laser in player.sprite.lasers + Enemy.lasers:               # added: slide every laser too
+        laser.x_pos = (laser.x_pos - scroll) % width                # added
+    for star in stars:                                              # added: the star background
+        star[0] = (star[0] - scroll * star[2] / 2) % width          # added: slide with the world, bigger stars faster so they look closer
+        star[1] = (star[1] + star[2] * 0.5) % screen.get_height()   # added: drift slowly down, so the ship looks like it's flying forward
+        pg.draw.circle(screen, 'white', (star[0], star[1]), star[2])   # added: draw the star
     player.draw(screen)
     enemies.update(screen.get_height())
     
@@ -81,21 +118,7 @@ while True:
         lives.lose_life(1)
         speed_boost = 0                       # added: a collision puts enemies back to their original speed
         if lives.out_of_lives():
-            outro_bg = pg.transform.smoothscale(pg.image.load('Demo_images/Galaxy_background_black.PNG').convert(), screen.get_size()) 
-            title = pg.font.Font(None, 72).render('Good Game Engineer', True, 'white')      
-            prompt = pg.font.Font(None, 32).render('See you Again', True, 'white') 
-            while not read_controls()['shoot']:                                           
-                for event in pg.event.get():                                              
-                    if event.type == pg.QUIT:                                          
-                        pg.quit()                                                        
-                        sys.exit()                                                          
-                screen.blit(intro_bg, (0, 0))                                            
-                screen.blit(title, title.get_rect(center=(400, 150)))               
-                screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
-                pg.display.update()                                                          
-                clock.tick(60)
-            pg.quit()
-            sys.exit()
+            game_over()                       # adjusted: show the outro, then quit
     for laser in player.sprite.lasers:
         laser.move(dt, speed_scale=50)
         
@@ -117,8 +140,7 @@ while True:
             laser.destroyed = True                            # added: the laser is used up
             lives.lose_life(1)                                # added: the player loses one life
             if lives.out_of_lives():                          # added: all lives gone, so the game ends
-                pg.quit()                                     # added
-                sys.exit()                                    # added
+                game_over()                                   # adjusted: show the outro, then quit
         laser.show(screen)                                    # added
     Enemy.lasers[:] = [laser for laser in Enemy.lasers if not laser.destroyed]   # added: drop used up enemy lasers
 
