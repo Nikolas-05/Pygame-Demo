@@ -14,7 +14,7 @@ pg.init()
 
 
 window_width = 800
-window_height = 800
+window_height = 400
 screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
 background= Background.Background(window_width, window_height)
 
