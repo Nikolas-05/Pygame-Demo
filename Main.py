@@ -9,6 +9,7 @@ import Enemy
 import Score
 import Background
 import ShootingEnemy
+
 #Initialize everything
 pg.init()
 
@@ -63,7 +64,7 @@ while True:
         num_enemy +=10
         for i in range(num_enemy):
             x_pos = 800/(num_enemy+1)*(i+1)
-            enemies.append(Enemy.Enemy(x_pos, y=0, scale = 2))
+            enemies.append(Enemy.Enemy(x_pos, y=0, scale = 5))
     
     
     
