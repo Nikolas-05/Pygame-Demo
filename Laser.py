@@ -57,6 +57,6 @@ class Laser:
         if isinstance(self.owner, Player.Player):
             if self.proj.bottom < 0:
                 self.destroyed = True
-        if enemy != None and isinstance(enemy, Enemy.Enemy):
+        if enemy != None and isinstance(enemy, Enemy.Enemy) and isinstance(self.owner, Player.Player):
             if self.proj.colliderect(enemy.enemy_rect):
                     self.destroyed = True

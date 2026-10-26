@@ -8,6 +8,7 @@ import Laser
 import Enemy
 import Score
 import Background
+import ShootingEnemy
 #Initialize everything
 pg.init()
 
@@ -31,7 +32,7 @@ score_obj = Score.Score(650,10, None, 40)
 score = 0
 for i in range(num_enemy):
     x_pos = 800/(num_enemy+1)*(i+1)
-    enemies.append(Enemy.Enemy(x_pos, y=0, scale = 2))
+    enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y=0, scale = 2, laser_time = 1))
 
 while True:
     
@@ -65,6 +66,7 @@ while True:
             enemies.append(Enemy.Enemy(x_pos, y=0, scale = 2))
     
     
+    
     for laser in lasers:
         laser.move(dt, speed_scale=50)
         laser.destroy()
@@ -76,10 +78,15 @@ while True:
         enemy.move(dt, v_x=0, v_y = 50)
         enemy.update()
         enemy.show(screen)
+        if isinstance(enemy, ShootingEnemy.ShootingEnemy):
+            if (pg.time.get_ticks()-enemy.last_laser_timer)/1000 > enemy.laser_time:
+                enemy.last_laser_timer = pg.time.get_ticks()
+                lasers.append(enemy.shoot())        
         for laser in lasers:
             score+=enemy.destroy(laser)
             laser.destroy(enemy)
     enemies = [enemy for enemy in enemies if not enemy.destroyed]
+    
     
     text = "Score: " + str(score)
     score_obj.update(text, screen)
