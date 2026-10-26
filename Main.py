@@ -9,13 +9,12 @@ import Enemy
 import Score
 import Background
 import ShootingEnemy
-from Lives import Lives
 #Initialize everything
 pg.init()
 
 
 window_width = 800
-window_height = 400
+window_height = 800
 screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
 background= Background.Background(window_width, window_height)
 
@@ -26,10 +25,6 @@ lasers = []
 enemies = []
 last_laser_timer = 0
 time_between_shot =  .5
-
-keys = pg.key.get_pressed()
-num_enemy = 10
-
 score_obj = Score.Score(650,10, None, 40)
 score = 0
 
@@ -37,48 +32,20 @@ score = 0
 waves = open("waves.txt", "r")
 
 def progressWave(waves):
-    line = waves.readline()
+    line = waves.readline().rstrip("\r\n")
     line = list(line)
     if not line:
         return
     while line[0] == "#":
-        line = waves.readline().strip()
+        line = waves.readline().rstrip("\r\n")
         line = list(line)
     for i in range(len(line)):
         x_pos = window_width/(len(line)+1)*(i+1)
         if line[i] == "S":
-            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2))
+            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2, laser_time=1))
         elif line[i] == "E":
             enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5))
 
-lives = Lives()
-
-
-def game_over():                           # added: the outro, used by both ways of losing the last life
-    outro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size()) 
-    title = pg.font.Font(None, 72).render('Good Game Engineer', True, 'white')      
-    prompt = pg.font.Font(None, 32).render('See you Again', True, 'white') 
-    while keys[pg.K_SPACE]:            # added: wait for the shoot button to be let go first
-
-        pg.event.pump()                          # added
-
-
-
-    while not keys[pg.K_SPACE]:                                           
-        for event in pg.event.get():                                              
-            if event.type == pg.QUIT:                                          
-                pg.quit()                                                        
-                sys.exit()                                                          
-        screen.blit(outro_bg, (0, 0))  # adjusted: was intro_bg                                            
-        screen.blit(title, title.get_rect(center=(400, 150)))               
-        screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
-        pg.display.update()                                                          
-        clock.tick(60)
-    pg.quit()                              # added
-    sys.exit()    
-
-
-    
 while True:
     
     #Basic Handling
@@ -102,7 +69,6 @@ while True:
     
     player.move(dt, keys)
     
-    
     #Game update section
     if not enemies:
         progressWave(waves)
@@ -115,7 +81,10 @@ while True:
     lasers = [laser for laser in lasers if not laser.destroyed]
     
     for enemy in enemies:
-        enemy.move(dt, v_x=0, v_y = 50)
+        if not isinstance(enemy,ShootingEnemy.ShootingEnemy):
+            enemy.move(dt, v_x=0, v_y = 80)
+        else:
+            enemy.move(dt, v_x=0, v_y = 50)
         enemy.update()
         enemy.show(screen)
         
@@ -129,16 +98,11 @@ while True:
             laser.destroy(enemy)
     enemies = [enemy for enemy in enemies if not enemy.destroyed]
     
-    # if pg.sprite.spritecollide(player, enemies, True):
-    #     lives.lose_life(1)
-    # speed_boost = 0                       # added: a collision puts enemies back to their original speed
-    # if lives.out_of_lives():
-    #     game_over()     
     
     text = "Score: " + str(score)
     score_obj.update(text, screen)
     player.update()
     player.show(screen)
-    lives.draw(screen)
+    
     pg.display.update()
     dt = clock.tick(60)/1000
