@@ -9,7 +9,6 @@ import Enemy
 import Score
 import Background
 import ShootingEnemy
-
 #Initialize everything
 pg.init()
 
@@ -26,14 +25,26 @@ lasers = []
 enemies = []
 last_laser_timer = 0
 time_between_shot =  .5
-
-num_enemy = 10
-
 score_obj = Score.Score(650,10, None, 40)
 score = 0
-for i in range(num_enemy):
-    x_pos = 800/(num_enemy+1)*(i+1)
-    enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y=0, scale = 2, laser_time = 1))
+
+#Wave handling
+waves = open("waves.txt", "r")
+
+def progressWave(waves):
+    line = waves.readline()
+    line = list(line)
+    if not line:
+        return
+    while line[0] == "#":
+        line = waves.readline().strip()
+        line = list(line)
+    for i in range(len(line)):
+        x_pos = window_width/(len(line)+1)*(i+1)
+        if line[i] == "S":
+            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2))
+        elif line[i] == "E":
+            enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5))
 
 while True:
     
@@ -61,12 +72,7 @@ while True:
     
     #Game update section
     if not enemies:
-        num_enemy +=10
-        for i in range(num_enemy):
-            x_pos = 800/(num_enemy+1)*(i+1)
-            enemies.append(Enemy.Enemy(x_pos, y=0, scale = 5))
-    
-    
+        progressWave(waves)
     
     for laser in lasers:
         laser.move(dt, speed_scale=50)
@@ -79,10 +85,12 @@ while True:
         enemy.move(dt, v_x=0, v_y = 50)
         enemy.update()
         enemy.show(screen)
+        
         if isinstance(enemy, ShootingEnemy.ShootingEnemy):
             if (pg.time.get_ticks()-enemy.last_laser_timer)/1000 > enemy.laser_time:
                 enemy.last_laser_timer = pg.time.get_ticks()
-                lasers.append(enemy.shoot())        
+                lasers.append(enemy.shoot())   
+        
         for laser in lasers:
             score+=enemy.destroy(laser)
             laser.destroy(enemy)
