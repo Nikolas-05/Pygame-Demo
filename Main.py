@@ -42,7 +42,12 @@ pg.time.set_timer(ENEMY_SPAWN, 2000)
 METEOR_SPAWN = pg.USEREVENT + 2
 pg.time.set_timer(METEOR_SPAWN, 3000)      # a new meteor every 3 seconds
 
+SPAWN_RAMP = pg.USEREVENT + 3              # added: an event that fires every 5 seconds to raise the spawn rate
+pg.time.set_timer(SPAWN_RAMP, 5000)        # added
+spawns_per_5s = 2.5                        # added: the starting rate, one enemy every 2 seconds = 2.5 per 5 seconds
+
 dt = 0
+speed_boost = 0                            # added: extra speed every enemy ship gets, grows over time
 
 
 while True:
@@ -60,6 +65,10 @@ while True:
             
         if event.type == METEOR_SPAWN:
             enemies.add(Meteor(screen.get_width()))
+
+        if event.type == SPAWN_RAMP:                                          # added: every 5 seconds
+            spawns_per_5s += 1                                                # added: one more enemy per 5 seconds
+            pg.time.set_timer(ENEMY_SPAWN, max(200, int(5000 / spawns_per_5s)))   # added: new time between spawns, never faster than one every 0.2s
             
     keys = pg.key.get_pressed()
     screen.fill('black')
@@ -70,7 +79,21 @@ while True:
     
     if pg.sprite.spritecollide(player.sprite, enemies, True):
         lives.lose_life(1)
+        speed_boost = 0                       # added: a collision puts enemies back to their original speed
         if lives.out_of_lives():
+            outro_bg = pg.transform.smoothscale(pg.image.load('Demo_images/Galaxy_background_black.PNG').convert(), screen.get_size()) 
+            title = pg.font.Font(None, 72).render('Good Game Engineer', True, 'white')      
+            prompt = pg.font.Font(None, 32).render('See you Again', True, 'white') 
+            while not read_controls()['shoot']:                                           
+                for event in pg.event.get():                                              
+                    if event.type == pg.QUIT:                                          
+                        pg.quit()                                                        
+                        sys.exit()                                                          
+                screen.blit(intro_bg, (0, 0))                                            
+                screen.blit(title, title.get_rect(center=(400, 150)))               
+                screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+                pg.display.update()                                                          
+                clock.tick(60)
             pg.quit()
             sys.exit()
     for laser in player.sprite.lasers:
@@ -99,6 +122,10 @@ while True:
         laser.show(screen)                                    # added
     Enemy.lasers[:] = [laser for laser in Enemy.lasers if not laser.destroyed]   # added: drop used up enemy lasers
 
+    speed_boost += 0.001                      # adjusted: enemies slowly speed up, every frame
+    for enemy in enemies:                     # adjusted: loop over the enemies on screen
+        if isinstance(enemy, Enemy):          # adjusted: only enemy ships, not meteors
+            enemy.y += speed_boost            # adjusted: move it down a little extra on top of its own speed
 
     enemies.draw(screen)
     lives.draw(screen)
