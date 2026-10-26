@@ -31,6 +31,22 @@ score = 0
 #Wave handling
 waves = open("waves.txt", "r")
 
+
+# # ---- intro screen ----
+# intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size()) 
+# title = pg.font.Font(None, 72).render('Galaga for Engineers', True, 'white')      
+# prompt = pg.font.Font(None, 32).render('Press SPACE or X to start', True, 'white') 
+# while not #needs to be keys[K_space]:                                           
+#     for event in pg.event.get():                                              
+#         if event.type == pg.QUIT:                                          
+#             pg.quit()                                                        
+#             sys.exit()                                                          
+#     screen.blit(intro_bg, (0, 0))                                            
+#     screen.blit(title, title.get_rect(center=(400, 150)))               
+#     screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+#     pg.display.update()                                                          
+#     clock.tick(60)
+
 def progressWave(waves):
     line = waves.readline().rstrip("\r\n")
     line = list(line)
