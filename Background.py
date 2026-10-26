@@ -8,7 +8,7 @@ class Background:
 
     def __init__(self,width,height):
     
-        self.background_sheet = pg.image.load("SpaceShooterAssetPack_BackGrounds.png").convert_alpha()
+        self.background_sheet = pg.image.load("Galaxy_background_black.PNG").convert_alpha()
         self.base_surf, self.background_rect = Background.get_sprite(sheet=self.background_sheet,angle=0,x=128,y=93,width=128,height=256)
         self.background_surf = pg.transform.scale(self.base_surf, (width, height))
         

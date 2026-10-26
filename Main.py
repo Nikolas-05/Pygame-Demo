@@ -97,6 +97,14 @@ while True:
         laser.move(dt, speed_scale=50)
         laser.destroy()
         laser.update()
+        if not isinstance(laser.owner, Player.Player) and laser.proj.colliderect(player.player_rect):   # added: an enemy laser hit the player
+            laser.destroyed = True                      # added: the laser is used up, so it only costs one life
+            lives.lose_life(1)                          # added: the player loses one life
+            if lives.out_of_lives():                    # added: no lives left
+                pg.quit()                               # added: end the game
+                sys.exit()                              # added
+        if laser.proj.top > window_height:              # added: enemy lasers that leave the bottom of the screen
+            laser.destroyed = True                      # added: get cleaned up
         laser.show(screen)
     lasers = [laser for laser in lasers if not laser.destroyed]
     
@@ -116,7 +124,7 @@ while True:
         for laser in lasers:
             score+=enemy.destroy(laser)
             laser.destroy(enemy)
-
+            
         if enemy.enemy_rect.colliderect(player.player_rect):   # added: the enemy touched the player
             enemy.destroy()                                     # added: remove that enemy so it only costs one life
             lives.lose_life(1)                                  # added: the player loses one life
