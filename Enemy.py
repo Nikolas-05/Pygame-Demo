@@ -3,20 +3,21 @@ import Laser
 import Player
 
 class Enemy:
-    
+    Sprite_location=(56,25,8,8)
     def __init__(self, x = 0, y = 0, scale = 1):
         self.x_pos = x
         self.y_pos = y
         self.scale = scale
         self.enemy_sheet = pg.image.load("SpaceShooterAssetPack_Ships.png").convert_alpha()
-        self.enemy_ship, self.enemy_rect = Enemy.get_sprite(self,sheet=self.enemy_sheet,angle=180,x=32,y=64,width=16,height=17,scale=self.scale)
+        sprite_x, sprite_y, width, height = self.Sprite_location
+        self.enemy_ship, self.enemy_rect = Enemy.get_sprite(self,sheet=self.enemy_sheet,angle=0,x=sprite_x,y=sprite_y,width=width,height=height,scale=self.scale)
         self.destroyed = False
 
     def update(self):
         self.enemy_rect.center = self.x_pos, self.y_pos
     
     def get_sprite(self,sheet,angle, x, y, width, height,scale=1):
-        sprite=pg.Surface((width,height)).convert_alpha()
+        sprite=pg.Surface((width,height), pg.SRCALPHA).convert_alpha()
         sprite.blit(sheet,(0,0), (x,y,width,height))
         sprite=pg.transform.rotozoom(sprite,angle,self.scale)
         sprite_rect=sprite.get_rect(center=(self.x_pos,self.y_pos))
@@ -45,5 +46,3 @@ class Enemy:
         else:
             self.destroyed = True
         return 0
-
-        
