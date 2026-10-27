@@ -3,93 +3,73 @@ import math as m
 import random as rand
 import os
 import sys
-
-
-class Player:
-
-    def __init__(self, x = 0, y = 0, scale = 1):
-        self.x_pos = x
-        self.y_pos = y
-        self.scale = scale
-        self.player_sheet = pg.image.load("SpaceShooterAssetPack_Ships.png").convert_alpha()
-        self.player_ship, self.player_rect = Player.get_sprite(self,sheet=self.player_sheet,angle=180,x=32,y=64,width=16,height=17,scale=self.scale)
-
-    def update(self):
-        self.player_rect.center = self.x_pos, self.y_pos
-    
-    def get_sprite(self,sheet,angle, x, y, width, height,scale=1):
-        sprite=pg.Surface((width,height)).convert_alpha()
-        sprite.blit(sheet,(0,0), (x,y,width,height))
-        sprite=pg.transform.rotozoom(sprite,angle,self.scale)
-        sprite_rect=sprite.get_rect(center=(self.x_pos,self.y_pos))
-        return sprite, sprite_rect
-    
-    def show(self, layer):
-        """
-        Pygame draw on specified layer, default
-        """
-        layer.blit(self.player_ship,self.player_rect)
-        
-    def move(self, dt, key, speed = 500):
-        if key[pg.K_LEFT] and self.player_rect.left >= 0:
-            self.x_pos+=-speed*dt
-        if key[pg.K_RIGHT] and self.player_rect.right<=800:
-            self.x_pos+=speed*dt
-        
-class Laser:
-    
-    def __init__(self, x, y, owner, color = "red", speed = 10, scale = 1):
-        
-        self.x_pos = x
-        self.y_pos = y
-        self.destroyed = False
-        self.color = color
-        self.speed = speed
-        self.owner = owner
-        self.scale = scale
-        self.proj = pg.Rect(0, 0, 5*self.scale, 30*self.scale)
-        self.proj.midbottom= (self.x_pos,self.y_pos)
-        
-    def update(self):
-        self.proj.midbottom = (self.x_pos, self.y_pos) 
-        
-    def show(self, layer):
-        pg.draw.rect(layer, self.color, self.proj)
-    
-    def move(self, dt, speed_scale):
-        """
-        Pass the dt time clock into this
-
-        """
-        if self.owner==player:
-            self.y_pos -= self.speed*dt*speed_scale
-        else:
-            self.y_pos += self.speed*dt*speed_scale
-            
-    def destroy(self):
-        """
-        Marks a flag to have destroy = True, need to run .remove somewhere in main, add enemy collision also
-
-        """
-        if self.owner==player:
-            if self.proj.bottom < 0:
-                self.destroyed = True
-        
+import Player
+import Laser
+import Enemy
+import Score
+import Background
+import ShootingEnemy
+import Lives                                   # added: the hearts / lives counter
+#Initialize everything
 pg.init()
 
-screen = pg.display.set_mode((800,800), pg.SCALED | pg.RESIZABLE)
+
+window_width = 800
+window_height = 800
+screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
+background= Background.Background(window_width, window_height)
+
 clock = pg.time.Clock()
-
-player = Player(x=400, y=700, scale=2)
+player = Player.Player(x=window_width/2, y=.875*window_height, scale=window_width*2/800)   # adjusted: y was 700, below the 400 tall window, so the player was off screen
 dt = 0
+lasers = []
+enemies = []
+last_laser_timer = 0
+time_between_shot =  .5
+score_obj = Score.Score(650*window_width/800,10*window_height/800, None, int(40*window_width/800))
+score = 0
+lives = Lives.Lives()                          # added: start with 3 lives
+keys = pg.key.get_pressed()
 
-lasers=[]
+#Wave handling
+waves = open("waves.txt", "r")
 
-last_laser_timer=0
-time_between_shot=.2
+
+# # ---- intro screen ----
+intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size())   # adjusted: no outer while True, it trapped the game in the intro forever
+title = pg.font.Font(None, int(72*window_width/800)).render('Galaga for Engineers', True, 'white')       # adjusted: moved out of the removed while True
+prompt = pg.font.Font(None, int(32*window_width/400)).render('Press SPACE to start', True, 'white')      # adjusted: moved out of the removed while True
+
+while not keys[pg.K_SPACE]:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            pg.quit()
+            sys.exit()
+    screen.blit(intro_bg, (0, 0))
+    screen.blit(title, title.get_rect(center=(window_width/2, window_height*.375)))
+    screen.blit(prompt, prompt.get_rect(center=(window_width/2, .65*window_height)))
+    pg.display.update()
+    clock.tick(60)
+    keys = pg.key.get_pressed()                # added: re-read the keyboard every frame, so pressing SPACE ends the intro
+
+def progressWave(waves):
+    line = waves.readline().rstrip("\r\n")
+    line = list(line)
+    if not line:
+        return
+    while line[0] == "#":
+        line = waves.readline().rstrip("\r\n")
+        line = list(line)
+    for i in range(len(line)):
+        x_pos = window_width/(len(line)+1)*(i+1)
+        if line[i] == "S":
+            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2*window_width/800, laser_time=1))
+        elif line[i] == "E":
+            enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5*window_width/800))
 
 while True:
-    dt = clock.tick(60)/1000
+    
+    #Basic Handling
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
@@ -98,24 +78,60 @@ while True:
             full = pg.display.is_fullscreen()
             if event.key == pg.K_F11 or (event.key == pg.K_ESCAPE and full):
                 pg.display.toggle_fullscreen()
-            if event.key == pg.K_SPACE and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
-                laser = Laser(player.player_rect.centerx, player.player_rect.top, owner=player)
-                lasers.append(laser)
-                last_laser_timer= pg.time.get_ticks()
-
-    screen.fill('Black')
     
+    #Player control section
     keys = pg.key.get_pressed()
+    background.show(screen)
     
-    player.move(dt, keys)
-    player.update()
-    player.show(screen)
+    if keys[pg.K_SPACE] and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
+        laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner= player, scale=1*window_width/800)
+        lasers.append(laser)
+        last_laser_timer= pg.time.get_ticks()
+    
+    player.move(dt, keys, speed=500*window_width/800)
+    
+    #Game update section
+    if not enemies:
+        progressWave(waves)
     
     for laser in lasers:
-        laser.move(dt, speed_scale=50)
+        laser.move(dt, speed_scale=50*window_height/800)
         laser.destroy()
         laser.update()
         laser.show(screen)
     lasers = [laser for laser in lasers if not laser.destroyed]
-    pg.display.update() 
+    
+    for enemy in enemies:
+        if not isinstance(enemy,ShootingEnemy.ShootingEnemy):
+            enemy.move(dt, v_x=0, v_y = 80*window_height/800)
+        else:
+            enemy.move(dt, v_x=0, v_y = 50*window_height/800)
+        enemy.update()
+        enemy.show(screen)
+        
+        if isinstance(enemy, ShootingEnemy.ShootingEnemy):
+            if (pg.time.get_ticks()-enemy.last_laser_timer)/1000 > enemy.laser_time:
+                enemy.last_laser_timer = pg.time.get_ticks()
+                lasers.append(enemy.shoot())   
+        
+        for laser in lasers:
+            score+=enemy.destroy(laser)
+            laser.destroy(enemy)
 
+        if enemy.enemy_rect.colliderect(player.player_rect):   # added: the enemy touched the player
+            enemy.destroy()                                     # added: remove that enemy so it only costs one life
+            lives.lose_life(1)                                  # added: the player loses one life
+            if lives.out_of_lives():                            # added: no lives left
+                pg.quit()                                       # added: end the game
+                sys.exit()                                      # added
+    enemies = [enemy for enemy in enemies if not enemy.destroyed]
+    
+    
+    text = "Score: " + str(score)
+    score_obj.update(text, screen)
+    player.update()
+    player.show(screen)
+    lives.draw(screen)                         # added: draw the hearts in the top left
+    
+    pg.display.update()
+    dt = clock.tick(60)/1000
