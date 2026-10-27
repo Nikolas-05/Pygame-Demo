@@ -12,7 +12,7 @@ class ShootingEnemy(Enemy.Enemy):
         self.explosion_sound = pg.mixer.Sound("explosion.mp3")
         self.explosion_sound.set_volume(0.6)
         
-    def shoot(self):
+    def shoot(self,window_height=800):
         return Laser.Laser(self.enemy_rect.centerx, self.enemy_rect.bottom, owner = Enemy, color = "green")
     
     def destroy(self, laser = None):

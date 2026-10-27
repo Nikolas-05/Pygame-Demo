@@ -60,12 +60,13 @@ title = pg.font.Font(None, int(72*window_width/800)).render('Galaga for Engineer
 prompt = pg.font.Font(None, int(32*window_width/400)).render('Press SPACE to start', True, 'white')      # adjusted: moved out of the removed while True
 
 trophy_surf=pg.image.load('GoldTrophy.png')
-trophy_surf=pg.transform.rotozoom(trophy_surf,0,10*window_width/800)
+trophy_surf = pg.transform.scale(trophy_surf, (int(150*window_width/window_width), int(150*window_height/window_height)))
 trophy_rect=trophy_surf.get_rect(center=(window_width/2,window_height*.45))
 
 while not keys[pg.K_SPACE]:
     for event in pg.event.get():
         if event.type == pg.QUIT:
+            waves.close()
             pg.quit()
             sys.exit()
     screen.blit(intro_bg, (0, 0))
@@ -87,7 +88,8 @@ def game_over():                           # added: the outro, used by both ways
         pg.event.pump()                        
     while not pg.key.get_pressed()[pg.K_SPACE]:   # adjusted: read the keyboard fresh each time, so pressing SPACE ends the game                                           
         for event in pg.event.get():                                              
-            if event.type == pg.QUIT:                                          
+            if event.type == pg.QUIT: 
+                waves.close()                                         
                 pg.quit()                                                        
                 sys.exit()                                                         
         screen.blit(outro_bg, (0, 0))  # adjusted: was intro_bg                                            
@@ -125,7 +127,7 @@ def progressWave(waves):
     for i in range(len(line)):
         x_pos = window_width/(len(line)+1)*(i+1)
         if line[i] == "S":
-            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2*window_width/800, laser_time=1*window_height/800))
+            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2*window_width/800, laser_time=1*800/window_height))
         elif line[i] == "E":
             enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5*window_width/800))
     return True
@@ -140,6 +142,7 @@ def winner():
     while pg.key.get_pressed()[pg.K_SPACE]:
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                waves.close()
                 pg.quit()
                 sys.exit()
         clock.tick(60)
@@ -147,6 +150,7 @@ def winner():
     while not pg.key.get_pressed()[pg.K_SPACE]:
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                waves.close()
                 pg.quit()
                 sys.exit()
         screen.blit(intro_bg, (0, 0))
@@ -160,6 +164,7 @@ def winner():
     while pg.key.get_pressed()[pg.K_SPACE]:
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                waves.close()
                 pg.quit()
                 sys.exit()
         clock.tick(60)
@@ -172,6 +177,7 @@ while True:
     #Basic Handling
     for event in pg.event.get():
         if event.type == pg.QUIT:
+            waves.close()
             pg.quit()
             sys.exit()
         if event.type == pg.KEYDOWN:
