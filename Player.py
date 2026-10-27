@@ -20,10 +20,11 @@ class Player:
         
         pg.display.update() 
     """
-    def __init__(self, x = 0, y = 0, scale = 1):
+    def __init__(self, x = 0, y = 0, scale = 1, window_width=800):
         self.x_pos = x
         self.y_pos = y
         self.scale = scale
+        self.window_width=window_width
         self.player_sheet = pg.image.load("SpaceShooterAssetPack_Ships.png").convert_alpha()
         self.player_ship, self.player_rect = Player.get_sprite(self,sheet=self.player_sheet,angle=180,x=32,y=64,width=16,height=17,scale=self.scale)
 
@@ -44,7 +45,7 @@ class Player:
         layer.blit(self.player_ship,self.player_rect)
         
     def move(self, dt, key, speed = 500):
-        if key[pg.K_LEFT] and self.player_rect.left >= 0:
+        if key[pg.K_LEFT] and (self.player_rect.left-3) >= 0:
             self.x_pos+=-speed*dt
-        if key[pg.K_RIGHT] and self.player_rect.right<=800:
+        if key[pg.K_RIGHT] and (self.player_rect.right+5)<=self.window_width:
             self.x_pos+=speed*dt
