@@ -65,8 +65,8 @@ def game_over():                           # added: the outro, used by both ways
                 pg.quit()                                                        
                 sys.exit()                                                          
         screen.blit(outro_bg, (0, 0))  # adjusted: was intro_bg                                            
-        screen.blit(title, title.get_rect(center=(400, 150)))               
-        screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+        screen.blit(title, title.get_rect(center=(window_width/2, window_height*.375)))               
+        screen.blit(prompt, prompt.get_rect(center=(window_width/2, .65*window_height)))                 
         pg.display.update()                                                          
         clock.tick(60)
     pg.quit()                              # added
@@ -115,7 +115,7 @@ while True:
         progressWave(waves)
     
     for laser in lasers:
-        laser.move(dt, speed_scale=50)
+        laser.move(dt, speed_scale=50*window_height/800)
         laser.destroy()
         laser.update()
         if not isinstance(laser.owner, Player.Player) and laser.proj.colliderect(player.player_rect):   # added: an enemy laser hit the player
