@@ -1,3 +1,5 @@
+
+#Talk abt OOP
 import pygame as pg
 import math as m
 import random as rand
@@ -15,6 +17,7 @@ pg.init()
 
 # win screen
 
+#Talk abt Music imports
 game_music=pg.mixer.Sound("music.mp3")
 game_music.set_volume(0.3) # 0.0 to 1.0
 music_channel=game_music.play(-1)
@@ -53,7 +56,7 @@ won=False
 #Wave handling
 waves = open("waves.txt", "r")
 
-
+#Talk abt Image handling and font/color change
 # # ---- intro screen ----
 intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size())   # adjusted: no outer while True, it trapped the game in the intro forever
 title = pg.font.Font(None, int(72*window_width/800)).render('Galaga for Engineers', True, 'white')       # adjusted: moved out of the removed while True
@@ -63,6 +66,8 @@ trophy_surf=pg.image.load('GoldTrophy.png')
 trophy_surf = pg.transform.scale(trophy_surf, (int(150*window_width/window_width), int(150*window_height/window_height)))
 trophy_rect=trophy_surf.get_rect(center=(window_width/2,window_height*.45))
 
+
+#Talk abt events
 while not keys[pg.K_SPACE]:
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -169,14 +174,12 @@ def winner():
                 sys.exit()
         clock.tick(60)
     reset_game()
-    return True
-    
-    
+    return True 
     
 while True:
     #Basic Handling
     for event in pg.event.get():
-        if event.type == pg.QUIT:
+        if event.type == pg.QUIT: #Game WILL crash if this 'If' statement is made
             waves.close()
             pg.quit()
             sys.exit()
@@ -211,8 +214,8 @@ while True:
             if not isinstance(laser.owner, Player.Player) and laser.proj.colliderect(player.player_rect):   # added: an enemy laser hit the player
                 laser.destroyed = True                      # added: the laser is used up, so it only costs one life
                 lives.lose_life(1)                          # added: the player loses one life
-            if laser.proj.top > window_height:              # added: enemy lasers that leave the bottom of the screen
-                laser.destroyed = True                      # added: get cleaned up
+            if laser.proj.top > window_height:              
+                laser.destroyed = True                      
             laser.show(screen)
         lasers = [laser for laser in lasers if not laser.destroyed]
         
@@ -236,11 +239,11 @@ while True:
                 score+=enemy.destroy(laser)
                 laser.destroy(enemy)
                 
-            if enemy.enemy_rect.colliderect(player.player_rect):   # added: the enemy touched the player
-                enemy.destroy()                                     # added: remove that enemy so it only costs one life
-                lives.lose_life(1)    # added: the player loses one life
+            if enemy.enemy_rect.colliderect(player.player_rect):
+                enemy.destroy()                                 
+                lives.lose_life(1)    
         
-        if lives.out_of_lives():                    # added: no lives left
+        if lives.out_of_lives():                 
             game_active=False
             end_time = pg.time.get_ticks()
         enemies = [enemy for enemy in enemies if not enemy.destroyed]
@@ -250,9 +253,9 @@ while True:
         score_obj.update(text, screen)
         player.update()
         player.show(screen)
-        lives.draw(screen)                         # added: draw the hearts in the top left
+        lives.draw(screen)
     else:
          game_active= winner() if won else game_over()
          
     pg.display.update()
-    dt = clock.tick(60)/1000
+    dt = clock.tick(60)/1000 #Vital to the framerates across computers
