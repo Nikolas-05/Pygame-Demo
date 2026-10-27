@@ -15,18 +15,18 @@ pg.init()
 
 
 window_width = 800
-window_height = 400
+window_height = 800
 screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
 background= Background.Background(window_width, window_height)
 
 clock = pg.time.Clock()
-player = Player.Player(x=400, y=350, scale=2)   # adjusted: y was 700, below the 400 tall window, so the player was off screen
+player = Player.Player(x=window_width/2, y=.875*window_height, scale=window_width*2/800)   # adjusted: y was 700, below the 400 tall window, so the player was off screen
 dt = 0
 lasers = []
 enemies = []
 last_laser_timer = 0
 time_between_shot =  .5
-score_obj = Score.Score(650,10, None, 40)
+score_obj = Score.Score(650*window_width/800,10*window_height/800, None, int(40*window_width/800))
 score = 0
 lives = Lives.Lives()                          # added: start with 3 lives
 keys = pg.key.get_pressed()
@@ -37,16 +37,17 @@ waves = open("waves.txt", "r")
 
 # # ---- intro screen ----
 intro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size())   # adjusted: no outer while True, it trapped the game in the intro forever
-title = pg.font.Font(None, 72).render('Galaga for Engineers', True, 'white')       # adjusted: moved out of the removed while True
-prompt = pg.font.Font(None, 32).render('Press SPACE to start', True, 'white')      # adjusted: moved out of the removed while True 
+title = pg.font.Font(None, int(72*window_width/800)).render('Galaga for Engineers', True, 'white')       # adjusted: moved out of the removed while True
+prompt = pg.font.Font(None, int(32*window_width/400)).render('Press SPACE to start', True, 'white')      # adjusted: moved out of the removed while True
+
 while not keys[pg.K_SPACE]:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
     screen.blit(intro_bg, (0, 0))
-    screen.blit(title, title.get_rect(center=(400, 150)))
-    screen.blit(prompt, prompt.get_rect(center=(400, 260)))
+    screen.blit(title, title.get_rect(center=(window_width/2, window_height*.375)))
+    screen.blit(prompt, prompt.get_rect(center=(window_width/2, .65*window_height)))
     pg.display.update()
     clock.tick(60)
     keys = pg.key.get_pressed()                # added: re-read the keyboard every frame, so pressing SPACE ends the intro
@@ -82,9 +83,9 @@ def progressWave(waves):
     for i in range(len(line)):
         x_pos = window_width/(len(line)+1)*(i+1)
         if line[i] == "S":
-            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2, laser_time=1))
+            enemies.append(ShootingEnemy.ShootingEnemy(x_pos, y = 0, scale = 2*window_width/800, laser_time=1))
         elif line[i] == "E":
-            enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5))
+            enemies.append(Enemy.Enemy(x_pos, y = 0, scale = 5*window_width/800))
 
 while True:
     
@@ -103,11 +104,11 @@ while True:
     background.show(screen)
     
     if keys[pg.K_SPACE] and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
-        laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner= player)
+        laser = Laser.Laser(player.player_rect.centerx, player.player_rect.top, owner= player, scale=1*window_width/800)
         lasers.append(laser)
         last_laser_timer= pg.time.get_ticks()
     
-    player.move(dt, keys)
+    player.move(dt, keys, speed=500*window_width/800)
     
     #Game update section
     if not enemies:
@@ -129,9 +130,9 @@ while True:
     
     for enemy in enemies:
         if not isinstance(enemy,ShootingEnemy.ShootingEnemy):
-            enemy.move(dt, v_x=0, v_y = 80)
+            enemy.move(dt, v_x=0, v_y = 80*window_height/800)
         else:
-            enemy.move(dt, v_x=0, v_y = 50)
+            enemy.move(dt, v_x=0, v_y = 50*window_height/800)
         enemy.update()
         enemy.show(screen)
         
