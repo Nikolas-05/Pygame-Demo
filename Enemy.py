@@ -12,6 +12,8 @@ class Enemy:
         sprite_x, sprite_y, width, height = self.Sprite_location
         self.enemy_ship, self.enemy_rect = Enemy.get_sprite(self,sheet=self.enemy_sheet,angle=0,x=sprite_x,y=sprite_y,width=width,height=height,scale=self.scale)
         self.destroyed = False
+        self.explosion_sound = pg.mixer.Sound("explosion.mp3")
+        self.explosion_sound.set_volume(0.6)
 
     def update(self):
         self.enemy_rect.center = self.x_pos, self.y_pos
@@ -42,6 +44,7 @@ class Enemy:
             if isinstance(laser, Laser.Laser):
                 if isinstance(laser.owner, Player.Player) and laser.proj.colliderect(self.enemy_rect):
                     self.destroyed = True
+                    self.explosion_sound.play()
                     return 1
         else:
             self.destroyed = True

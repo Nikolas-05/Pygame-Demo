@@ -16,6 +16,8 @@ class Lives:
         self.scale = scale
         self.lives = start_lives
         self.regen_timer = 0
+        self.explosion_sound = pg.mixer.Sound("explosion.mp3")
+        self.explosion_sound.set_volume(0.6)
 
         img = pg.image.load('heart.png').convert_alpha()
         w, h = img.get_size()
@@ -27,6 +29,7 @@ class Lives:
 
     def lose_life(self, count=1):
         self.lives = max(0, self.lives - count)
+        self.explosion_sound.play()
 
     def add_life(self):
         # never more than the full row of hearts

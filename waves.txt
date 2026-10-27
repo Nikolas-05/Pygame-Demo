@@ -1,11 +1,7 @@
-#Type S for shooting enemy, E for regular, Space to space them out
+#Type S for shooting enemy, E for regular
 #Use # For comments
 EEEE
 S
 EESEE
 SESES
 EEEEE
-SSESS
-EEEEEE
-SSSSSS
-SSSSSSSSSS
