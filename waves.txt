@@ -1,0 +1,7 @@
+#Type S for shooting enemy, E for regular
+#Use # For comments
+EEEE
+S
+EESEE
+SESES
+EEEEE
