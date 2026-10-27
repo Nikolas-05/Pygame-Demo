@@ -52,6 +52,26 @@ while not keys[pg.K_SPACE]:
     clock.tick(60)
     keys = pg.key.get_pressed()                # added: re-read the keyboard every frame, so pressing SPACE ends the intro
 
+
+def game_over():                           # added: the outro, used by both ways of losing the last life
+    outro_bg = pg.transform.smoothscale(pg.image.load('Galaxy_background_black.PNG').convert(), screen.get_size()) 
+    title = pg.font.Font(None, 72).render('Good Game Engineer', True, 'white')      
+    prompt = pg.font.Font(None, 32).render('See you Again', True, 'white') 
+    while pg.key.get_pressed()[pg.K_SPACE]:
+        pg.event.pump()                        
+    while not pg.key.get_pressed()[pg.K_SPACE]:   # adjusted: read the keyboard fresh each time, so pressing SPACE ends the game                                           
+        for event in pg.event.get():                                              
+            if event.type == pg.QUIT:                                          
+                pg.quit()                                                        
+                sys.exit()                                                          
+        screen.blit(outro_bg, (0, 0))  # adjusted: was intro_bg                                            
+        screen.blit(title, title.get_rect(center=(400, 150)))               
+        screen.blit(prompt, prompt.get_rect(center=(400, 260)))                 
+        pg.display.update()                                                          
+        clock.tick(60)
+    pg.quit()                              # added
+    sys.exit()                             # added
+
 def progressWave(waves):
     line = waves.readline().rstrip("\r\n")
     line = list(line)
@@ -95,9 +115,16 @@ while True:
         progressWave(waves)
     
     for laser in lasers:
-        laser.move(dt, speed_scale=50*window_height/800)
+        laser.move(dt, speed_scale=50)
         laser.destroy()
         laser.update()
+        if not isinstance(laser.owner, Player.Player) and laser.proj.colliderect(player.player_rect):   # added: an enemy laser hit the player
+            laser.destroyed = True                      # added: the laser is used up, so it only costs one life
+            lives.lose_life(1)                          # added: the player loses one life
+            if lives.out_of_lives():                    # added: no lives left
+                game_over()  
+        if laser.proj.top > window_height:              # added: enemy lasers that leave the bottom of the screen
+            laser.destroyed = True                      # added: get cleaned up
         laser.show(screen)
     lasers = [laser for laser in lasers if not laser.destroyed]
     
@@ -117,13 +144,12 @@ while True:
         for laser in lasers:
             score+=enemy.destroy(laser)
             laser.destroy(enemy)
-
+            
         if enemy.enemy_rect.colliderect(player.player_rect):   # added: the enemy touched the player
             enemy.destroy()                                     # added: remove that enemy so it only costs one life
             lives.lose_life(1)                                  # added: the player loses one life
             if lives.out_of_lives():                            # added: no lives left
-                pg.quit()                                       # added: end the game
-                sys.exit()                                      # added
+                game_over()                                     # added
     enemies = [enemy for enemy in enemies if not enemy.destroyed]
     
     

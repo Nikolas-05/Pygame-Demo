@@ -1,18 +1,26 @@
+import pygame as pg
+import math as m
+import random as rand
+import os
+import sys
+import Player
+import Enemy
+
 class Laser:
-"""
-add in code
-            if event.key == pg.K_SPACE and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
-                laser = Laser(player.player_rect.centerx, player.player_rect.top, owner=player)
-                lasers.append(laser)
-                last_laser_timer= pg.time.get_ticks()
-in while loop
-    for laser in lasers:
-        laser.move(dt, speed_scale=50)
-        laser.destroy()
-        laser.update()
-        laser.show(screen)
-    lasers = [laser for laser in lasers if not laser.destroyed]
-"""
+    """
+    add in code
+                if event.key == pg.K_SPACE and (pg.time.get_ticks()-last_laser_timer)/1000 > time_between_shot:
+                    laser = Laser(player.player_rect.centerx, player.player_rect.top, owner=player)
+                    lasers.append(laser)
+                    last_laser_timer= pg.time.get_ticks()
+    in while loop
+        for laser in lasers:
+            laser.move(dt, speed_scale=50)
+            laser.destroy()
+            laser.update()
+            laser.show(screen)
+        lasers = [laser for laser in lasers if not laser.destroyed]
+    """
     def __init__(self, x, y, owner, color = "red", speed = 10, scale = 1):
         
         self.x_pos = x
@@ -36,16 +44,19 @@ in while loop
         Pass the dt time clock into this
 
         """
-        if self.owner==player:
+        if isinstance(self.owner, Player.Player):
             self.y_pos -= self.speed*dt*speed_scale
         else:
             self.y_pos += self.speed*dt*speed_scale
             
-    def destroy(self):
+    def destroy(self, enemy = None):
         """
         Marks a flag to have destroy = True, need to run .remove somewhere in main, add enemy collision also
 
         """
-        if self.owner==player:
+        if isinstance(self.owner, Player.Player):
             if self.proj.bottom < 0:
                 self.destroyed = True
+        if enemy != None and isinstance(enemy, Enemy.Enemy) and isinstance(self.owner, Player.Player):
+            if self.proj.colliderect(enemy.enemy_rect):
+                    self.destroyed = True
