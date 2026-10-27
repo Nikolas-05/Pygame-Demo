@@ -15,7 +15,7 @@ pg.init()
 
 
 window_width = 800
-window_height = 800
+window_height = 400
 screen = pg.display.set_mode((window_width,window_height), pg.SCALED | pg.RESIZABLE)
 background= Background.Background(window_width, window_height)
 
@@ -28,7 +28,7 @@ last_laser_timer = 0
 time_between_shot =  .5
 score_obj = Score.Score(650*window_width/800,10*window_height/800, None, int(40*window_width/800))
 score = 0
-lives = Lives.Lives()                          # added: start with 3 lives
+lives = Lives.Lives(scale=1*window_width/400)                          # added: start with 3 lives
 keys = pg.key.get_pressed()
 
 #Wave handling
